@@ -460,7 +460,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('authForm').addEventListener('submit', (e) => {
     e.preventDefault();
     const pass = document.getElementById('authPassword').value;
-    if (pass === '336933') {
+    if (pass === '2258') {
       isAuthenticated = true;
       sessionStorage.setItem('isAdmin', 'true');
       document.getElementById('authModal').close();
