@@ -1,16 +1,16 @@
 // Initial Mock State
 const defaultState = {
   users: [
-    { id: 1, name: 'Franklin', role: 'Líder', points: 0 },
+    { id: 5, name: 'Arilson', role: 'Líder', points: 0 },
     { id: 2, name: 'Raone', role: 'Líder', points: 0 },
     { id: 3, name: 'Marcelo', role: 'Líder', points: 0 },
     { id: 4, name: 'Leonardo', role: 'Líder', points: 0 },
-    { id: 5, name: 'Arilson', role: 'Líder', points: 0 },
-    { id: 6, name: 'Ueslei', role: 'Auxiliar', points: 0 },
+    { id: 1, name: 'Franklin', role: 'Líder', points: 0 },
+    { id: 10, name: 'Fernando', role: 'Auxiliar', points: 0 },
     { id: 7, name: 'Guilherme', role: 'Auxiliar', points: 0 },
     { id: 8, name: 'Jeferson', role: 'Auxiliar', points: 0 },
     { id: 9, name: 'Arthur', role: 'Auxiliar', points: 0 },
-    { id: 10, name: 'Fernando', role: 'Auxiliar', points: 0 },
+    { id: 6, name: 'Ueslei', role: 'Auxiliar', points: 0 },
   ],
   trips: [],
   folgas: []
@@ -25,6 +25,31 @@ if (stateString) {
   state.users.forEach(u => {
     if(u.id === 8 && u.name === 'Cauê') u.name = 'Jeferson';
   });
+}
+
+// Migração para inverter Equipe 1 e Equipe 5 no localStorage
+if (stateString && !localStorage.getItem('teamSwapMigrationDone')) {
+  // Encontra os líderes atuais para trocar a ordem
+  const franklinIdx = state.users.findIndex(u => u.name === 'Franklin' && u.role === 'Líder');
+  const arilsonIdx = state.users.findIndex(u => u.name === 'Arilson' && u.role === 'Líder');
+  
+  if (franklinIdx !== -1 && arilsonIdx !== -1) {
+    const temp = state.users[franklinIdx];
+    state.users[franklinIdx] = state.users[arilsonIdx];
+    state.users[arilsonIdx] = temp;
+  }
+  
+  // Encontra os auxiliares atuais para trocar a ordem
+  const uesleiIdx = state.users.findIndex(u => u.name === 'Ueslei' && u.role === 'Auxiliar');
+  const fernandoIdx = state.users.findIndex(u => u.name === 'Fernando' && u.role === 'Auxiliar');
+  
+  if (uesleiIdx !== -1 && fernandoIdx !== -1) {
+    const temp = state.users[uesleiIdx];
+    state.users[uesleiIdx] = state.users[fernandoIdx];
+    state.users[fernandoIdx] = temp;
+  }
+  
+  localStorage.setItem('teamSwapMigrationDone', 'true');
 }
 
 // Migração: Garante que campos novos existam
