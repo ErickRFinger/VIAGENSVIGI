@@ -256,7 +256,7 @@ function renderSchedule() {
       <td>#${trip.id} ${badges ? '<br><div style="margin-top:4px;">'+badges+'</div>' : ''}</td>
       <td><strong>${dateRange}</strong></td>
       <td>${leader ? leader.name : '?'}</td>
-      <td>${assistant ? assistant.name : '?'}</td>
+      <td>${assistant ? assistant.name : '<span class="text-muted" style="font-size:0.8rem">Sem Auxiliar</span>'}</td>
       <td>${getStatusBadge(trip.status)}</td>
       <td>${tripDays} d</td>
       <td style="font-size: 0.8rem; color: var(--text-muted);">${originalText || '-'}</td>
@@ -264,7 +264,7 @@ function renderSchedule() {
         <div class="action-btns">
           <div class="action-line">
             <button class="btn btn-secondary btn-small" title="Trocar Líder" onclick="requireAuth(() => openTradeModal(${trip.id}, 'Líder', ${leader ? leader.id : 0}))">🔄 Líder</button>
-            <button class="btn btn-secondary btn-small" title="Trocar Auxiliar" onclick="requireAuth(() => openTradeModal(${trip.id}, 'Auxiliar', ${assistant ? assistant.id : 0}))">🔄 Aux</button>
+            ${assistant ? `<button class="btn btn-secondary btn-small" title="Trocar Auxiliar" onclick="requireAuth(() => openTradeModal(${trip.id}, 'Auxiliar', ${assistant.id}))">🔄 Aux</button>` : ''}
           </div>
           <div class="action-line" style="margin-top: 0.2rem">
             <button class="btn btn-secondary btn-icon" title="Editar Viagem" onclick="requireAuth(() => openEditModal(${trip.id}))">✏️</button>
@@ -382,7 +382,7 @@ window.openEditModal = (tripId) => {
   });
 
   const assistantSelect = document.getElementById('editAssistant');
-  assistantSelect.innerHTML = '';
+  assistantSelect.innerHTML = '<option value="">-- Sem Auxiliar --</option>';
   state.users.filter(u => u.role === 'Auxiliar').forEach(a => {
     const option = document.createElement('option');
     option.value = a.id;
@@ -544,7 +544,8 @@ document.addEventListener('DOMContentLoaded', () => {
     trip.dailyLog = dailyLog;
     
     const newLId = parseInt(document.getElementById('editLeader').value);
-    const newAId = parseInt(document.getElementById('editAssistant').value);
+    const newAIdRaw = document.getElementById('editAssistant').value;
+    const newAId = newAIdRaw ? parseInt(newAIdRaw) : null;
     
     if(trip.leaderId !== newLId) {
        if(!trip.originalLeaderId) trip.originalLeaderId = trip.leaderId;
@@ -616,7 +617,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
 
       const assistantSelect = document.getElementById('createAssistant');
-      assistantSelect.innerHTML = '';
+      assistantSelect.innerHTML = '<option value="">-- Sem Auxiliar --</option>';
       assistants.forEach(a => {
         const option = document.createElement('option');
         option.value = a.id;
@@ -642,7 +643,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const newId = state.trips.length > 0 ? Math.max(...state.trips.map(t=>t.id)) + 1 : 1;
     
     const selectedLeaderId = parseInt(document.getElementById('createLeader').value);
-    const selectedAssistantId = parseInt(document.getElementById('createAssistant').value);
+    const selectedAssistantIdRaw = document.getElementById('createAssistant').value;
+    const selectedAssistantId = selectedAssistantIdRaw ? parseInt(selectedAssistantIdRaw) : null;
 
     let originalLeaderId = null;
     let originalAssistantId = null;
