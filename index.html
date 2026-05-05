@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sistema de Escala de Viagens 2.0</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./src/style.css" />
+</head>
+<body>
+  <div id="app">
+    <header class="glass-header">
+      <h1>🚀 Cronograma de Viagens</h1>
+      <p class="subtitle">A Fila é Soberana</p>
+    </header>
+
+    <main class="dashboard">
+      <aside class="leaderboard-section glass-panel">
+        <h2>🏆 Ranking & Pontos</h2>
+        <ul id="leaderboard" class="leaderboard-list">
+          <!-- Populated by JS -->
+        </ul>
+
+        <h2 style="margin-top: 2.5rem; font-size: 1.2rem; margin-bottom: 1rem; border-bottom: 1px solid var(--glass-border); padding-bottom: 0.5rem;">👥 Equipes Fixas</h2>
+        <ul id="teamsList" class="leaderboard-list">
+          <!-- Populated by JS -->
+        </ul>
+      </aside>
+
+      <section class="schedule-section glass-panel">
+        <div class="schedule-header" style="flex-wrap: wrap; gap: 1rem;">
+          <div style="display: flex; align-items: center; gap: 1rem;">
+            <h2>Próximas Viagens</h2>
+            <div style="display: flex; gap: 0.5rem; align-items: center; background: rgba(255,255,255,0.05); padding: 0.3rem 0.6rem; border-radius: 8px;">
+              <label for="monthFilter" style="font-weight: 600; color: var(--primary); font-size: 0.9rem;">📅 Mês:</label>
+              <input type="month" id="monthFilter" class="glass-input" style="padding: 0.2rem 0.5rem; height: auto; min-width: 130px;">
+              <button id="clearFilterBtn" class="btn btn-secondary btn-small" title="Limpar Filtro" style="padding: 0.2rem 0.5rem;">✖</button>
+            </div>
+          </div>
+          <div class="header-actions">
+            <button id="addTripBtn" class="btn btn-primary">Gerar Próxima Viagem</button>
+            <button id="commissionBtn" class="btn btn-success">💰 Comissões</button>
+            <button id="exportPdfBtn" class="btn btn-secondary">🖨️ Exportar PDF</button>
+          </div>
+        </div>
+        
+        <div class="table-responsive">
+          <table id="scheduleTable">
+            <thead>
+              <tr>
+                <th>Viagem</th>
+                <th>Data Prevista</th>
+                <th>Líder</th>
+                <th>Auxiliar</th>
+                 <th>Status</th>
+                 <th>Dias</th>
+                 <th>Original</th>
+                 <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="scheduleBody">
+              <!-- Populated by JS -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <!-- Trade Modal -->
+    <dialog id="tradeModal" class="glass-modal">
+      <div class="modal-content">
+        <h2>Negociar Troca</h2>
+        <p id="tradeTripInfo"></p>
+        
+        <form class="trade-form" id="tradeForm">
+          <div class="form-group">
+            <label for="tradeTarget">Você quer trocar com:</label>
+            <select id="tradeTarget" required class="glass-input">
+              <!-- Populated dynamically based on role -->
+            </select>
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="btn btn-secondary" onclick="document.getElementById('tradeModal').close()">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Confirmar Troca (Custa 1 Ponto)</button>
+          </div>
+        </form>
+      </div>
+    </dialog>
+
+    <!-- Edit Modal -->
+    <dialog id="editModal" class="glass-modal">
+      <div class="modal-content" style="max-width: 500px; max-height: 90vh; overflow-y: auto;">
+        <h2>Editar Viagem <span id="editTripId"></span></h2>
+        
+        <form class="trade-form" id="editForm">
+          <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+            <div class="form-group" style="flex: 1; margin-bottom: 0;">
+              <label for="editStartDate">Data Início:</label>
+              <input type="date" id="editStartDate" required class="glass-input">
+            </div>
+            <div class="form-group" style="flex: 1; margin-bottom: 0;">
+              <label for="editEndDate">Data Fim:</label>
+              <input type="date" id="editEndDate" required class="glass-input">
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label>Dias e Serviços:</label>
+            <div id="editDailyContainer" class="daily-container"></div>
+          </div>
+
+          <div class="form-group">
+            <label for="editLeader">Líder:</label>
+            <select id="editLeader" required class="glass-input"></select>
+          </div>
+          <div class="form-group">
+            <label for="editAssistant">Auxiliar:</label>
+            <select id="editAssistant" required class="glass-input"></select>
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="btn btn-secondary" onclick="document.getElementById('editModal').close()">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+          </div>
+        </form>
+      </div>
+    </dialog>
+
+    <!-- Create Trip Modal -->
+    <dialog id="createTripModal" class="glass-modal">
+      <div class="modal-content" style="max-width: 500px; max-height: 90vh; overflow-y: auto;">
+        <h2>Gerar Nova Viagem</h2>
+        
+        <form class="trade-form" id="createTripForm">
+          <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+            <div class="form-group" style="flex: 1; margin-bottom: 0;">
+              <label for="createStartDate">Data Início:</label>
+              <input type="date" id="createStartDate" required class="glass-input">
+            </div>
+            <div class="form-group" style="flex: 1; margin-bottom: 0;">
+              <label for="createEndDate">Data Fim:</label>
+              <input type="date" id="createEndDate" required class="glass-input">
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label>Dias e Serviços:</label>
+            <div id="createDailyContainer" class="daily-container"></div>
+          </div>
+
+          <div class="form-group">
+            <label for="createLeader">Líder:</label>
+            <select id="createLeader" required class="glass-input"></select>
+          </div>
+          <div class="form-group">
+            <label for="createAssistant">Auxiliar:</label>
+            <select id="createAssistant" required class="glass-input"></select>
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="btn btn-secondary" onclick="document.getElementById('createTripModal').close()">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Confirmar Viagem</button>
+          </div>
+        </form>
+      </div>
+    </dialog>
+
+    <!-- Commission Report Modal -->
+    <dialog id="commissionModal" class="glass-modal">
+      <div class="modal-content" style="max-width: 650px;">
+        <div class="modal-header-flex">
+          <h2>💰 Relatório de Comissões</h2>
+          <div style="display: flex; gap: 0.5rem; align-items: center;">
+            <button type="button" class="btn btn-secondary btn-small print-btn" onclick="window.print()">🖨️ PDF</button>
+            <button type="button" class="btn-close" onclick="document.getElementById('commissionModal').close()">✖</button>
+          </div>
+        </div>
+        <p class="text-muted" style="margin-bottom: 1rem; font-size: 0.9rem;">
+          Este relatório contabiliza os dias trabalhados por cada técnico, separados por tipo de serviço (VIGI / Transmissão) para facilitar o pagamento das comissões. Exclui folgas e dias transferidos/devidos.
+        </p>
+        <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+          <table class="history-table">
+            <thead>
+              <tr>
+                <th>Técnico</th>
+                <th>Dias Trabalhados</th>
+                <th>Dias VIGI</th>
+                <th>Dias Transmissão</th>
+              </tr>
+            </thead>
+            <tbody id="commissionBody">
+              <!-- Populated by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </dialog>
+
+    <!-- History (Extrato) Modal -->
+    <dialog id="historyModal" class="glass-modal">
+      <div class="modal-content" style="max-width: 500px;">
+        <div class="modal-header-flex">
+          <h2>Extrato de Pontos - <span id="historyUserName"></span></h2>
+          <button type="button" class="btn-close" onclick="document.getElementById('historyModal').close()">✖</button>
+        </div>
+        <div class="history-score-card">
+          <span>Saldo Atual:</span>
+          <strong id="historyTotalPoints" class="score-value">0 pts</strong>
+        </div>
+        <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+          <table class="history-table">
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Descrição</th>
+                <th>Pontos</th>
+              </tr>
+            </thead>
+            <tbody id="historyBody">
+              <!-- Populated by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </dialog>
+
+    <!-- Detailed Report Modal -->
+    <dialog id="detailedReportModal" class="glass-modal">
+      <div class="modal-content" style="max-width: 800px; max-height: 90vh; overflow-y: auto;">
+        <div class="modal-header-flex">
+          <h2>📄 Relatório Detalhado de Pagamentos</h2>
+          <div style="display: flex; gap: 0.5rem; align-items: center;">
+            <button type="button" class="btn btn-secondary btn-small print-btn" onclick="window.print()">🖨️ Imprimir/Salvar PDF</button>
+            <button type="button" class="btn-close" onclick="document.getElementById('detailedReportModal').close()">✖</button>
+          </div>
+        </div>
+        <div id="detailedReportBody" style="margin-top: 1rem;">
+          <!-- Gerado via JS -->
+        </div>
+      </div>
+    </dialog>
+
+    <!-- Auth Modal -->
+    <dialog id="authModal" class="glass-modal">
+      <div class="modal-content" style="max-width: 400px; text-align: center;">
+        <h2>🔒 Acesso Restrito</h2>
+        <p>Digite a senha para fazer edições.</p>
+        <form id="authForm" class="trade-form">
+          <input type="password" id="authPassword" class="glass-input" placeholder="******" required style="margin-bottom: 1.5rem; text-align: center; letter-spacing: 5px; font-size: 1.5rem;">
+          <div class="modal-actions" style="justify-content: center;">
+            <button type="button" class="btn btn-secondary" onclick="document.getElementById('authModal').close()">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Desbloquear</button>
+          </div>
+        </form>
+      </div>
+    </dialog>
+
+    <div id="toastContainer" class="toast-container"></div>
+  </div>
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>
