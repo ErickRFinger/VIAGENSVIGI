@@ -578,9 +578,9 @@ document.addEventListener('DOMContentLoaded', () => {
        if(trip.leaderId === trip.originalLeaderId) trip.originalLeaderId = null;
     }
     if(trip.assistantId !== newAId) {
-       if(!trip.originalAssistantId) trip.originalAssistantId = trip.assistantId;
+       if(!trip.originalAssistantId && trip.assistantId) trip.originalAssistantId = trip.assistantId;
        trip.assistantId = newAId;
-       if(trip.assistantId === trip.originalAssistantId) trip.originalAssistantId = null;
+       if(trip.assistantId === trip.originalAssistantId || !trip.assistantId) trip.originalAssistantId = null;
     }
 
     if(trip.leaderId !== newLId || trip.assistantId !== newAId) {
@@ -598,10 +598,11 @@ document.addEventListener('DOMContentLoaded', () => {
       const assistants = state.users.filter(u => u.role === 'Auxiliar');
       
       let lastOrigLId = null, lastOrigAId = null;
-      if(state.trips.length > 0) {
-        const lastT = state.trips[state.trips.length - 1];
-        lastOrigLId = lastT.originalLeaderId || lastT.leaderId;
-        lastOrigAId = lastT.originalAssistantId || lastT.assistantId;
+      for (let i = state.trips.length - 1; i >= 0; i--) {
+        const t = state.trips[i];
+        if (!lastOrigLId && (t.originalLeaderId || t.leaderId)) lastOrigLId = t.originalLeaderId || t.leaderId;
+        if (!lastOrigAId && (t.originalAssistantId || t.assistantId)) lastOrigAId = t.originalAssistantId || t.assistantId;
+        if (lastOrigLId && lastOrigAId) break;
       }
       
       if (lastOrigLId) nextLeaderIndex = leaders.findIndex(l => l.id === lastOrigLId) + 1;
@@ -679,7 +680,7 @@ document.addEventListener('DOMContentLoaded', () => {
       originalLeaderId = createContext.expectedLeaderId;
       status = 'Criado com Troca';
     }
-    if (selectedAssistantId !== createContext.expectedAssistantId) {
+    if (selectedAssistantId && selectedAssistantId !== createContext.expectedAssistantId) {
       originalAssistantId = createContext.expectedAssistantId;
       status = 'Criado com Troca';
     }
