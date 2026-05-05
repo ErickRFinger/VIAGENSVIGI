@@ -201,8 +201,12 @@
     <dialog id="historyModal" class="glass-modal">
       <div class="modal-content" style="max-width: 500px;">
         <div class="modal-header-flex">
-          <h2>Extrato de Pontos - <span id="historyUserName"></span></h2>
-          <button type="button" class="btn-close" onclick="document.getElementById('historyModal').close()">✖</button>
+          <h2 style="font-size: 1.2rem;">Extrato - <span id="historyUserName"></span></h2>
+          <div style="display: flex; gap: 0.5rem; align-items: center;">
+            <button type="button" id="wppExtractBtn" class="btn btn-success btn-small print-btn">📱 Zap</button>
+            <button type="button" class="btn btn-secondary btn-small print-btn" onclick="window.print()">🖨️ PDF</button>
+            <button type="button" class="btn-close" onclick="document.getElementById('historyModal').close()">✖</button>
+          </div>
         </div>
         <div class="history-score-card">
           <span>Saldo Atual:</span>

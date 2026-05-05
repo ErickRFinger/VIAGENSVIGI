@@ -408,6 +408,22 @@ window.openHistoryModal = (userId) => {
   // Calculate points for this specific view
   let viewPoints = userHistory.reduce((acc, curr) => acc + curr.val, 0);
 
+  document.getElementById('wppExtractBtn').onclick = () => {
+    let text = `*Extrato de Viagens - ${user.name}*\n`;
+    text += `*Saldo ${currentMonthFilter ? currentMonthFilter : 'Total'}:* ${viewPoints} pts\n\n`;
+    
+    if (userHistory.length === 0) {
+      text += `Nenhuma movimentação.\n`;
+    } else {
+      userHistory.forEach(h => {
+        const valStr = h.val > 0 ? `+${h.val}` : `${h.val}`;
+        text += `📅 *${formatDate(h.date)}*\n📝 ${h.desc}\n💰 Pts: ${valStr}\n\n`;
+      });
+    }
+    text += `_Acesse o painel para mais detalhes!_`;
+    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
+  };
+
   const totalEl = document.getElementById('historyTotalPoints');
   totalEl.textContent = `${viewPoints} pts`;
   if (viewPoints > 0) {
